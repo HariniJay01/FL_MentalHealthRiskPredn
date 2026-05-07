@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FL Mental Health Risk Detector | Federated Learning Dashboard</title>
+  <meta name="description" content="Federated Learning-based Mental Health Risk Detection from Distributed Social Media Text Data. Privacy-preserving AI across Twitter, Reddit, Facebook, Instagram, and LinkedIn nodes." />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="icon" href="data:,">
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- ══════════════════ SIDEBAR ══════════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🧠</div>
+      <div>
+        <div class="logo-text">FL Mental Health</div>
+        <div class="logo-sub">RISK DETECTION</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Dashboard</div>
+      <div class="nav-item active" id="nav-overview" data-page="overview">
+        <span class="nav-icon">📊</span> Overview
+      </div>
+
+      <div class="nav-section-title">Federated Nodes</div>
+      <div class="nav-item" id="nav-nodes" data-page="nodes">
+        <span class="nav-icon">🌐</span> Client Nodes
+      </div>
+      <div class="nav-item" id="nav-training" data-page="training">
+        <span class="nav-icon">⚡</span> Training Control
+      </div>
+
+      <div class="nav-section-title">Intelligence</div>
+      <div class="nav-item" id="nav-analytics" data-page="analytics">
+        <span class="nav-icon">📈</span> Analytics
+      </div>
+      <div class="nav-item" id="nav-privacy" data-page="privacy">
+        <span class="nav-icon">🔒</span> Privacy & Security
+      </div>
+      <div class="nav-item" id="nav-predict" data-page="predict">
+        <span class="nav-icon">🔍</span> Risk Predictor
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div style="margin-bottom:4px;font-weight:600;color:var(--text-secondary)">FL Protocol</div>
+      <div>FedAvg · Differential Privacy</div>
+      <div style="margin-top:6px">v1.0.0 · NIT-DA 2024</div>
+    </div>
+  </aside>
+
+  <!-- ══════════════════ MAIN ══════════════════════ -->
+  <main class="main-content">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-title" id="topbar-title">🧠 Overview</div>
+      <div class="topbar-right">
+        <div class="status-badge">
+          <div class="pulse-dot" id="server-dot"></div>
+          <span id="server-status-text">Connecting…</span>
+        </div>
+        <div class="round-badge">Round <span id="topbar-round">0</span></div>
+        <div class="timestamp" id="clock"></div>
+      </div>
+    </header>
+
+    <!-- ══════════ PAGE: OVERVIEW ══════════════════ -->
+    <section class="page active" id="page-overview">
+      <div class="page-header">
+        <h1>Federated Learning Dashboard</h1>
+        <p>Privacy-preserving mental health risk detection across social media platforms</p>
+      </div>
+
+      <!-- KPI Stats -->
+      <div class="stat-grid">
+        <div class="stat-card" style="--accent:var(--cyan)">
+          <div class="stat-label">FL Round</div>
+          <div class="stat-value" id="stat-round">0</div>
+          <div class="stat-sub">Aggregation rounds completed</div>
+        </div>
+        <div class="stat-card" style="--accent:var(--violet)">
+          <div class="stat-label">Active Nodes</div>
+          <div class="stat-value" id="stat-nodes">5</div>
+          <div class="stat-sub">Social media platforms</div>
+        </div>
+        <div class="stat-card" style="--accent:var(--green)">
+          <div class="stat-label">Trained Nodes</div>
+          <div class="stat-value" id="stat-trained">0/5</div>
+          <div class="stat-sub">Nodes with fitted models</div>
+        </div>
+        <div class="stat-card" style="--accent:var(--orange)">
+          <div class="stat-label">Total Samples</div>
+          <div class="stat-value" id="stat-samples">0</div>
+          <div class="stat-sub">Distributed across nodes</div>
+        </div>
+        <div class="stat-card" style="--accent:var(--cyan)">
+          <div class="stat-label">Best Accuracy</div>
+          <div class="stat-value" id="stat-accuracy">—</div>
+          <div class="stat-sub">Global model</div>
+        </div>
+        <div class="stat-card" style="--accent:var(--violet)">
+          <div class="stat-label">Best F1 Score</div>
+          <div class="stat-value" id="stat-f1">—</div>
+          <div class="stat-sub">Macro avg across nodes</div>
+        </div>
+        <div class="stat-card" style="--accent:var(--red)">
+          <div class="stat-label">Risk Ratio</div>
+          <div class="stat-value" id="stat-risk">—</div>
+          <div class="stat-sub">Population at mental health risk</div>
+        </div>
+      </div>
+
+      <!-- Network + Risk Gauge -->
+      <div class="grid-2-1 mb-24">
+        <!-- FL Network Topology -->
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">🕸️</span> Federated Network Topology</div>
+          <div id="fl-network" style="height:300px;position:relative">
+            <canvas id="network-canvas" style="width:100%;height:100%"></canvas>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+            <div class="flex items-center gap-12 text-sm text-muted">
+              <div style="width:30px;height:2px;background:var(--cyan)"></div> Weights flow (trained)
+            </div>
+            <div class="flex items-center gap-12 text-sm text-muted">
+              <div style="width:30px;height:1px;border-top:1px dashed rgba(255,255,255,.2)"></div> Not yet trained
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk Gauge + Node List -->
+        <div>
+          <div class="card mb-20">
+            <div class="card-title"><span class="card-title-icon">🎯</span> Mental Health Risk Score</div>
+            <div class="gauge-wrap">
+              <canvas id="gauge-canvas" width="240" height="130"></canvas>
+              <div class="gauge-value" id="gauge-value">—</div>
+              <div class="gauge-label">Population identified<br>at mental health risk</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accuracy Chart + Node List -->
+      <div class="grid-2 mb-24">
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">📈</span> Global Model – Accuracy & F1 over Rounds</div>
+          <div class="chart-wrap" style="height:220px">
+            <canvas id="chart-accuracy"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">🌐</span> Node Status</div>
+          <div id="node-status-list"></div>
+        </div>
+      </div>
+
+      <!-- Sample Distribution + Latest Round -->
+      <div class="grid-2 mb-24">
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">📦</span> Sample Distribution per Node</div>
+          <div class="chart-wrap" style="height:200px">
+            <canvas id="chart-samples"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">🔔</span> Latest Round Summary</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div style="background:var(--bg-surface);border-radius:8px;padding:12px">
+              <div class="stat-label">Round #</div>
+              <div style="font-size:22px;font-weight:700;color:var(--cyan)" id="latest-round">—</div>
+            </div>
+            <div style="background:var(--bg-surface);border-radius:8px;padding:12px">
+              <div class="stat-label">Participating</div>
+              <div style="font-size:22px;font-weight:700;color:var(--violet)" id="latest-clients">—</div>
+            </div>
+            <div style="background:var(--bg-surface);border-radius:8px;padding:12px">
+              <div class="stat-label">Accuracy</div>
+              <div style="font-size:22px;font-weight:700;color:var(--green)" id="latest-acc">—</div>
+            </div>
+            <div style="background:var(--bg-surface);border-radius:8px;padding:12px">
+              <div class="stat-label">F1 Score</div>
+              <div style="font-size:22px;font-weight:700;color:var(--orange)" id="latest-f1">—</div>
+            </div>
+            <div style="background:var(--bg-surface);border-radius:8px;padding:12px">
+              <div class="stat-label">Samples Used</div>
+              <div style="font-size:22px;font-weight:700;color:var(--pink)" id="latest-samples">—</div>
+            </div>
+            <div style="background:var(--bg-surface);border-radius:8px;padding:12px">
+              <div class="stat-label">Aggregation Time</div>
+              <div style="font-size:22px;font-weight:700;color:var(--text-primary)" id="latest-time">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Risk Donut -->
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">🔴</span> Risk Distribution</div>
+          <div class="chart-wrap" style="height:200px">
+            <canvas id="chart-risk-donut"></canvas>
+          </div>
+        </div>
+        <div class="card" style="grid-column:span 2">
+          <div class="card-title"><span class="card-title-icon">ℹ️</span> About This System</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:13px;color:var(--text-secondary)">
+            <div>
+              <div style="font-weight:600;color:var(--cyan);margin-bottom:6px">🔒 Privacy-First Design</div>
+              Raw social media posts <strong>never leave</strong> the client node. Only model weights (gradients) are transmitted to the aggregation server.
+            </div>
+            <div>
+              <div style="font-weight:600;color:var(--violet);margin-bottom:6px">⚡ FedAvg Algorithm</div>
+              Each round, client weights are aggregated via weighted averaging proportional to local dataset size.
+            </div>
+            <div>
+              <div style="font-weight:600;color:var(--green);margin-bottom:6px">🧠 Model Architecture</div>
+              HashingVectorizer (n=65536, bigrams) + SGD Classifier (log-loss). Supports incremental learning and federated weight sharing.
+            </div>
+            <div>
+              <div style="font-weight:600;color:var(--orange);margin-bottom:6px">📊 Mental Health Mapping</div>
+              Sentiment 0 (negative) → At Risk. Sentiment 4 (positive) → Safe. Risk probability calibrated via Platt scaling.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ PAGE: NODES ══════════════════════ -->
+    <section class="page" id="page-nodes">
+      <div class="page-header">
+        <h1>Client Nodes</h1>
+        <p>Each node represents a social media platform. Upload data and train locally — data never leaves the node.</p>
+      </div>
+      <div class="flex gap-12 mb-20">
+        <button class="btn btn-primary" onclick="trainAllNodes()" id="btn-train-all">
+          ⚡ Train All Nodes
+        </button>
+        <button class="btn btn-outline" onclick="pollAll().then(renderNodes)">
+          🔄 Refresh Status
+        </button>
+      </div>
+      <div class="nodes-grid" id="nodes-grid"></div>
+    </section>
+
+    <!-- ══════════ PAGE: TRAINING ══════════════════ -->
+    <section class="page" id="page-training">
+      <div class="page-header">
+        <h1>Training Control</h1>
+        <p>Manage local training and run federated aggregation rounds using FedAvg.</p>
+      </div>
+
+      <!-- FedAvg Control -->
+      <div class="card mb-24">
+        <div class="card-title"><span class="card-title-icon">🚀</span> Federated Aggregation Control</div>
+        <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+          <div style="flex:1;min-width:280px">
+            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.7">
+              Click <strong style="color:var(--cyan)">Run FL Round</strong> to:
+              <br>① Collect weights from all trained nodes
+              <br>② Compute FedAvg (weighted average by sample count)
+              <br>③ Push global model back to all nodes
+              <br>④ Record round metrics &amp; history
+            </p>
+            <div class="flex gap-12">
+              <button class="btn btn-primary" id="btn-aggregate" onclick="runFLRound()">
+                🚀 Run FL Round (FedAvg)
+              </button>
+              <button class="btn btn-outline" onclick="trainAllNodes()">
+                ⚡ Train All First
+              </button>
+            </div>
+          </div>
+          <div style="background:var(--bg-surface);border-radius:var(--radius-md);padding:16px;min-width:240px;font-size:12px;color:var(--text-secondary);line-height:2">
+            <div>✅ Raw data stays at each node</div>
+            <div>✅ Only weights transmitted (~256 KB)</div>
+            <div>✅ Weighted FedAvg aggregation</div>
+            <div>✅ Global model distributed back</div>
+            <div>✅ No central data repository</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Per-node training panel -->
+      <div class="card mb-24">
+        <div class="card-title"><span class="card-title-icon">🌐</span> Node-by-Node Training</div>
+        <div id="training-nodes-grid"
+          style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="grid-2 mb-24">
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">📉</span> Weight Divergence over Rounds</div>
+          <div class="chart-wrap" style="height:220px">
+            <canvas id="chart-divergence"></canvas>
+          </div>
+          <div class="text-sm text-muted mt-12">
+            Lower divergence → nodes are converging to a shared global model
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">👥</span> Node Participation per Round</div>
+          <div class="chart-wrap" style="height:220px">
+            <canvas id="chart-participation"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Round History Table -->
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">📋</span> Round History</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Round</th>
+                <th>Timestamp</th>
+                <th>Clients</th>
+                <th>Accuracy</th>
+                <th>F1</th>
+                <th>Risk Ratio</th>
+                <th>Samples</th>
+                <th>Time</th>
+                <th>Participants</th>
+              </tr>
+            </thead>
+            <tbody id="round-history-tbody">
+              <tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:24px">
+                No rounds yet. Run a FL round after training nodes.
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ PAGE: ANALYTICS ══════════════════ -->
+    <section class="page" id="page-analytics">
+      <div class="page-header">
+        <h1>Analytics</h1>
+        <p>Deep-dive into per-node and global model performance metrics.</p>
+      </div>
+
+      <!-- Comprehensive Metrics Table -->
+      <div class="card mb-24">
+        <div class="card-title"><span class="card-title-icon">📊</span> All-Node Metrics Comparison</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Node</th>
+                <th>Samples</th>
+                <th>Accuracy</th>
+                <th>F1</th>
+                <th>Precision</th>
+                <th>Recall</th>
+                <th>AUC-ROC</th>
+                <th>Log Loss</th>
+                <th>Risk %</th>
+                <th>At Risk #</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="metrics-table-tbody">
+              <tr><td colspan="11" style="text-align:center;color:var(--text-muted);padding:24px">
+                Train nodes to see metrics
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Charts Row 1 -->
+      <div class="grid-2 mb-24">
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">📊</span> Per-Node Performance (Acc / F1 / Prec / Rec)</div>
+          <div class="chart-wrap" style="height:260px">
+            <canvas id="chart-node-bar"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">🕸️</span> Mental Health Risk Ratio per Node</div>
+          <div class="chart-wrap" style="height:260px">
+            <canvas id="chart-risk-radar"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 2 -->
+      <div class="grid-2 mb-24">
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">🎯</span> AUC-ROC per Node (Polar Area)</div>
+          <div class="chart-wrap" style="height:260px">
+            <canvas id="chart-auc"></canvas>
+          </div>
+          <div class="text-sm text-muted mt-12">AUC closer to 1.0 → better discrimination between risk and safe</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">📡</span> Communication Efficiency (Data vs Weights)</div>
+          <div class="chart-wrap" style="height:260px">
+            <canvas id="chart-comm"></canvas>
+          </div>
+          <div class="text-sm text-muted mt-12">Weights transmitted ≪ Full data → massive privacy saving</div>
+        </div>
+      </div>
+
+      <!-- Explanation -->
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">📚</span> Metric Definitions</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;font-size:13px">
+          <div>
+            <div style="color:var(--cyan);font-weight:600;margin-bottom:4px">Accuracy</div>
+            Fraction of posts correctly classified (risk vs safe).
+          </div>
+          <div>
+            <div style="color:var(--violet);font-weight:600;margin-bottom:4px">F1 Score</div>
+            Harmonic mean of Precision and Recall. Robust to class imbalance.
+          </div>
+          <div>
+            <div style="color:var(--green);font-weight:600;margin-bottom:4px">Precision</div>
+            Of all posts flagged as "at risk", how many truly are?
+          </div>
+          <div>
+            <div style="color:var(--orange);font-weight:600;margin-bottom:4px">Recall</div>
+            Of all truly "at risk" posts, how many were detected?
+          </div>
+          <div>
+            <div style="color:var(--pink);font-weight:600;margin-bottom:4px">AUC-ROC</div>
+            Area under ROC curve. 0.5 = random, 1.0 = perfect classifier.
+          </div>
+          <div>
+            <div style="color:var(--red);font-weight:600;margin-bottom:4px">Risk Ratio</div>
+            Fraction of the platform's posts classified as mental health risk.
+          </div>
+          <div>
+            <div style="color:var(--text-primary);font-weight:600;margin-bottom:4px">Log Loss</div>
+            Measures calibration quality of predicted probabilities.
+          </div>
+          <div>
+            <div style="color:var(--cyan);font-weight:600;margin-bottom:4px">Weight Divergence</div>
+            Std dev of L2-norms across client models. Lower = better convergence.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ PAGE: PRIVACY ══════════════════ -->
+    <section class="page" id="page-privacy">
+      <div class="page-header">
+        <h1>Privacy &amp; Security</h1>
+        <p>Federated Learning guarantees: raw data never leaves client nodes.</p>
+      </div>
+
+      <!-- Privacy KPIs -->
+      <div class="stat-grid mb-24">
+        <div class="stat-card" style="--accent:var(--green)">
+          <div class="stat-label">Total Data at Nodes</div>
+          <div class="stat-value" id="priv-total-data">—</div>
+          <div class="stat-sub">Never leaves client nodes</div>
+        </div>
+        <div class="stat-card" style="--accent:var(--cyan)">
+          <div class="stat-label">Weights Transmitted</div>
+          <div class="stat-value" id="priv-transmitted">—</div>
+          <div class="stat-sub">FedAvg – weights only</div>
+        </div>
+        <div class="stat-card" style="--accent:var(--violet)">
+          <div class="stat-label">Privacy Savings</div>
+          <div class="stat-value" id="priv-ratio">—</div>
+          <div class="stat-sub">Data protected from transmission</div>
+        </div>
+        <div class="stat-card" style="--accent:var(--orange)">
+          <div class="stat-label">Protocol</div>
+          <div class="stat-value" style="font-size:20px" id="priv-protocol">FedAvg</div>
+          <div class="stat-sub">Federated Averaging</div>
+        </div>
+      </div>
+
+      <!-- Privacy Flow Diagram -->
+      <div class="card mb-24">
+        <div class="card-title"><span class="card-title-icon">🔄</span> Data Flow Diagram</div>
+        <div class="privacy-flow">
+          <div class="pf-node">
+            <div class="pf-icon" style="background:rgba(29,161,242,.15);border-color:rgba(29,161,242,.3)">🐦</div>
+            <div class="pf-label">Twitter<br><strong style="color:var(--green)">Data Local</strong></div>
+          </div>
+          <div>
+            <div class="pf-arrow">→</div>
+            <div style="font-size:10px;color:var(--cyan);text-align:center">Weights only</div>
+          </div>
+          <div class="pf-node">
+            <div class="pf-icon" style="background:rgba(0,212,255,.1);border-color:rgba(0,212,255,.3)">🧠</div>
+            <div class="pf-label" style="color:var(--cyan)">FL Server<br>FedAvg</div>
+          </div>
+          <div>
+            <div class="pf-arrow blocked">✖</div>
+            <div style="font-size:10px;color:var(--red);text-align:center">Raw data<br>BLOCKED</div>
+          </div>
+          <div class="pf-node">
+            <div class="pf-icon" style="background:rgba(93,93,93,.2);border-color:rgba(255,255,255,.1)">🗄️</div>
+            <div class="pf-label" style="color:var(--text-muted)">Central DB<br>(doesn't exist)</div>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;background:var(--bg-surface);border-radius:var(--radius-md);padding:16px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;font-size:13px">
+            <div>
+              <div style="font-size:18px;margin-bottom:6px">🛡️</div>
+              <div style="font-weight:600;margin-bottom:4px">Data Sovereignty</div>
+              <div class="text-muted">Each platform retains full ownership and control of its users' posts.</div>
+            </div>
+            <div>
+              <div style="font-size:18px;margin-bottom:6px">🔐</div>
+              <div style="font-weight:600;margin-bottom:4px">Weight-Only Transmission</div>
+              <div class="text-muted">Model coefficients (~256 KB) replace raw data (potentially GBs) in transit.</div>
+            </div>
+            <div>
+              <div style="font-size:18px;margin-bottom:6px">⚖️</div>
+              <div style="font-weight:600;margin-bottom:4px">Weighted Aggregation</div>
+              <div class="text-muted">Nodes with more data have proportionally higher influence on the global model.</div>
+            </div>
+            <div>
+              <div style="font-size:18px;margin-bottom:6px">🔬</div>
+              <div style="font-weight:600;margin-bottom:4px">No Data Reconstruction</div>
+              <div class="text-muted">HashingVectorizer + SGD weights cannot be reverse-engineered to original text.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Per-node privacy table -->
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">📋</span> Per-Node Privacy Report</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Node</th>
+                <th>Samples</th>
+                <th>Data Size</th>
+                <th>Data Location</th>
+                <th>Weights Shared</th>
+                <th>Raw Data Shared</th>
+              </tr>
+            </thead>
+            <tbody id="priv-table-tbody">
+              <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px">
+                Loading privacy report…
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:12px;padding:14px;background:rgba(16,185,129,.07);border-radius:var(--radius-sm);border:1px solid rgba(16,185,129,.2)">
+          <div id="priv-guarantee" class="text-sm" style="color:var(--green)">
+            ✅ Loading privacy guarantee…
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ PAGE: PREDICT ═══════════════════ -->
+    <section class="page" id="page-predict">
+      <div class="page-header">
+        <h1>Mental Health Risk Predictor</h1>
+        <p>Classify social media text for mental health risk using the trained federated model.</p>
+      </div>
+
+      <div class="grid-2-1 mb-24">
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">✍️</span> Enter Text to Analyse</div>
+          <textarea
+            id="predict-textarea"
+            class="predict-input mb-16"
+            placeholder="Enter one sentence per line, e.g.:
+I feel hopeless and nobody seems to care
+Had a great day at the park with friends!
+Can't sleep again, everything feels overwhelming
+Life is beautiful today!"
+          ></textarea>
+          <div class="flex gap-12 mb-20">
+            <button class="btn btn-primary" onclick="runPredict()">🔍 Analyse Risk</button>
+            <button class="btn btn-outline" onclick="el('predict-textarea').value='';el('predict-results').innerHTML=''">
+              🗑️ Clear
+            </button>
+          </div>
+
+          <!-- Results -->
+          <div class="card-title"><span class="card-title-icon">📋</span> Results</div>
+          <div id="predict-results">
+            <div class="text-sm text-muted" style="text-align:center;padding:24px">
+              Train at least one node, then enter text above to classify
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk Legend + Examples -->
+        <div>
+          <div class="card mb-16">
+            <div class="card-title"><span class="card-title-icon">🎨</span> Risk Levels</div>
+            <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+              <div style="display:flex;align-items:center;gap:12px;padding:10px;background:rgba(239,68,68,.08);border-radius:8px;border-left:3px solid var(--red)">
+                <span style="font-size:18px">🔴</span>
+                <div>
+                  <div style="font-weight:600;color:var(--red)">High Risk  (&ge; 70%)</div>
+                  <div class="text-muted">Immediate concern. Text strongly indicates mental health distress.</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;padding:10px;background:rgba(245,158,11,.08);border-radius:8px;border-left:3px solid var(--orange)">
+                <span style="font-size:18px">🟡</span>
+                <div>
+                  <div style="font-weight:600;color:var(--orange)">Medium Risk (40–70%)</div>
+                  <div class="text-muted">Moderate concern. Borderline negative sentiment detected.</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;padding:10px;background:rgba(16,185,129,.08);border-radius:8px;border-left:3px solid var(--green)">
+                <span style="font-size:18px">🟢</span>
+                <div>
+                  <div style="font-weight:600;color:var(--green)">Low Risk (&lt; 40%)</div>
+                  <div class="text-muted">Generally positive or neutral sentiment. Low risk indicator.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="card-title-icon">💡</span> How It Works</div>
+            <div style="font-size:12px;color:var(--text-secondary);line-height:2">
+              <div>1️⃣ Text is <strong>pre-processed</strong> (normalised, URLs removed)</div>
+              <div>2️⃣ <strong>HashingVectorizer</strong> converts to bigram feature vector (65K dims)</div>
+              <div>3️⃣ <strong>SGD Classifier</strong> predicts risk probability</div>
+              <div>4️⃣ Global weights from latest <strong>FedAvg</strong> round are used</div>
+              <div>5️⃣ Results shown with confidence score per text</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<!-- Scripts -->
+<script src="/js/api.js"></script>
+<script src="/js/charts.js"></script>
+<script src="/js/main.js"></script>
+</body>
+</html>

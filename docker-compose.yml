@@ -1,0 +1,125 @@
+version: '3.8'
+
+services:
+  fl-server:
+    build: ./server
+    container_name: fl-server
+    ports:
+      - "5000:5000"
+    networks:
+      - fl-network
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+
+  fl-client-twitter:
+    build: ./client
+    container_name: fl-client-twitter
+    ports:
+      - "5001:5000"
+    networks:
+      - fl-network
+    environment:
+      - NODE_NAME=Twitter
+      - NODE_ID=twitter
+      - NODE_COLOR=#1DA1F2
+      - NODE_ICON=🐦
+      - FL_SERVER_URL=http://fl-server:5000
+    volumes:
+      - twitter_data:/app/data
+    restart: unless-stopped
+
+  fl-client-reddit:
+    build: ./client
+    container_name: fl-client-reddit
+    ports:
+      - "5002:5000"
+    networks:
+      - fl-network
+    environment:
+      - NODE_NAME=Reddit
+      - NODE_ID=reddit
+      - NODE_COLOR=#FF4500
+      - NODE_ICON=🤖
+      - FL_SERVER_URL=http://fl-server:5000
+    volumes:
+      - reddit_data:/app/data
+    restart: unless-stopped
+
+  fl-client-facebook:
+    build: ./client
+    container_name: fl-client-facebook
+    ports:
+      - "5003:5000"
+    networks:
+      - fl-network
+    environment:
+      - NODE_NAME=Facebook
+      - NODE_ID=facebook
+      - NODE_COLOR=#4267B2
+      - NODE_ICON=📘
+      - FL_SERVER_URL=http://fl-server:5000
+    volumes:
+      - facebook_data:/app/data
+    restart: unless-stopped
+
+  fl-client-instagram:
+    build: ./client
+    container_name: fl-client-instagram
+    ports:
+      - "5004:5000"
+    networks:
+      - fl-network
+    environment:
+      - NODE_NAME=Instagram
+      - NODE_ID=instagram
+      - NODE_COLOR=#C13584
+      - NODE_ICON=📸
+      - FL_SERVER_URL=http://fl-server:5000
+    volumes:
+      - instagram_data:/app/data
+    restart: unless-stopped
+
+  fl-client-linkedin:
+    build: ./client
+    container_name: fl-client-linkedin
+    ports:
+      - "5005:5000"
+    networks:
+      - fl-network
+    environment:
+      - NODE_NAME=LinkedIn
+      - NODE_ID=linkedin
+      - NODE_COLOR=#0077B5
+      - NODE_ICON=💼
+      - FL_SERVER_URL=http://fl-server:5000
+    volumes:
+      - linkedin_data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: fl-frontend
+    ports:
+      - "80:80"
+    networks:
+      - fl-network
+    depends_on:
+      - fl-server
+      - fl-client-twitter
+      - fl-client-reddit
+      - fl-client-facebook
+      - fl-client-instagram
+      - fl-client-linkedin
+    restart: unless-stopped
+
+networks:
+  fl-network:
+    driver: bridge
+
+volumes:
+  twitter_data:
+  reddit_data:
+  facebook_data:
+  instagram_data:
+  linkedin_data:

@@ -1,0 +1,9 @@
+flask
+flask-cors
+numpy
+scikit-learn
+requests
+pandas
+scipy
+gunicorn
+werkzeug
